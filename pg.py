@@ -128,13 +128,13 @@ class Net(nn.Module):
 
 class PolicyGradient(object):
     def __init__(self, env, config, logger=None):
-        """
+        '''
         初始化策略梯度类
         Args:
             env: open-ai中的环境或者自己写的环境，满足gym的接口
             config: class with hyperparameters
             logger: logger instance from logging module
-        """
+        '''
         # 被保存模型的路径
         if not os.path.exists(config.output_path):
             os.makedirs(config.output_path)
@@ -185,9 +185,11 @@ class PolicyGradient(object):
     
     def train_policy_model(self, ob, action, advantage):
         '''
-        ob: np.array shape = [None, obeservation_dim]
-        action: np.array shape = [None, ？]
-        advantage : np.array shape = [None, 1] 
+        训练策略网络
+        args:
+            ob: np.array shape = [None, obeservation_dim]
+            action: np.array shape = [None, ？]
+            advantage : np.array shape = [None, 1] 
         '''
         ob_tensor = torch.from_numpy(ob).float()
         action_label = torch.from_numpy(action).float() # 不是onehot编码，调用cal_logprob中会自动转化为onehot
@@ -209,8 +211,10 @@ class PolicyGradient(object):
     
     def train_baseline_model(self, ob, advantage):
         '''
-        ob: np.array shape = [None, obeservation_dim]
-        advantage : np.array shape = [None, 1] 
+        训练baseline网络
+        args:
+            ob: np.array shape = [None, obeservation_dim]
+            advantage : np.array shape = [None, 1] 
         '''
         ob_tensor = torch.from_numpy(ob).float()
         advantage_tensor = torch.from_numpy(advantage).float()
@@ -238,11 +242,7 @@ class PolicyGradient(object):
         if self.discrete:
             labels = labels.long()
             logits = model_output
-            # batch_size = labels.shape[0]
-            # class_num = self.action_dim
-            # labels_one_hot = torch.zeros(batch_size, class_num).scatter_(1, labels.view(-1, 1), 1).long()
             criterion = nn.CrossEntropyLoss(reduction='none')
-            # logprob 应该是一个向量，不是一个数，这里直接算成一个数了，去了平均
             logprob = criterion(logits, labels)
         else:
             loc = model_output # shape = [None, 1] or [None, k]
@@ -251,28 +251,28 @@ class PolicyGradient(object):
     
     def cal_logprob_of_batch_normal(self, model_output, real_action):
         '''
+        待完善
         '''
         if model_output.shape[1] == 1:
             # 单变量正态分布
             logprob = -Normal(loc=model_output, scale=0.1).log_prob(real_action.view(-1, 1)).view(-1)
         elif model_output.shape[1] > 1:
-            # 多变量正态分布， 一个一个算速度太慢，直接用多batch单变量正态分布
-            len_model = model_output.shape[0]
-            logprob = torch.zeros(len_model)
-            for i, data in enumerate(zip(model_output, real_action)):
-                mean, label = data[0], data[1]
-                size_m = len(mean)
-                logprob[i] = -MultivariateNormal(loc=mean, covariance_matrix=torch.eye(size_m)).log_prob(label)
+            # # 多变量正态分布， 一个一个算速度太慢
+            # len_model = model_output.shape[0]
+            # logprob = torch.zeros(len_model)
+            # for i, data in enumerate(zip(model_output, real_action)):
+            #     mean, label = data[0], data[1]
+            #     size_m = len(mean)
+            #     logprob[i] = -MultivariateNormal(loc=mean, covariance_matrix=torch.eye(size_m)).log_prob(label)
 
-            # 用单变量正态分布代替
-            #logprob = torch.sum(-Normal(loc=model_output, scale=0.1).log_prob(real_action), dim=1)
+            # 用单变量正态分布代替多变量正态分布，这里假设多变量正态分布的协方差是对角矩阵
+            logprob = torch.sum(-Normal(loc=model_output, scale=0.1).log_prob(real_action), dim=1)
         return logprob
 
-
     def calculate_advantage(self, returns, observations):
-        """
+        '''
         计算advantage
-        """
+        '''
         adv = returns
         if self.config.use_baseline:
             # 一批观测的值函数, 多条路径的观测，也是很长的list, 长度为num_path*path_len
@@ -287,9 +287,9 @@ class PolicyGradient(object):
         return adv
     
     def init_averages(self):
-        """
+        '''
         初始化回报的平均值
-        """
+        '''
         self.avg_reward = 0.
         self.max_reward = 0.
         self.std_reward = 0.
@@ -315,10 +315,10 @@ class PolicyGradient(object):
         return action
     
     def sample_path(self, env, num_episodes = None):
-        """
+        '''
         从环境中采集轨迹，输入环境，路径条数
         采集一个batch，多条路径构成一个batch, 一个batch的长度固定
-        """
+        '''
         episode = 0
         episode_rewards = []
         paths = []
@@ -361,9 +361,9 @@ class PolicyGradient(object):
         return paths, episode_rewards
     
     def get_returns(self, paths):
-        """
+        '''
         根据一条或者多条轨迹时间步上的累计回报：Gt
-        """
+        '''
         all_returns = []
         for path in paths:
             # 一条路径中一组汇报rt
@@ -377,13 +377,12 @@ class PolicyGradient(object):
         return returns
     
     def update_averages(self, rewards, scores_eval):
-        """
+        '''
         计算一组rewards的平均值，最大值，标准差
-    
         Args:
-                rewards: deque
-                scores_eval: list
-        """
+            rewards: deque
+            scores_eval: list
+        '''
         self.avg_reward = np.mean(rewards)
         self.max_reward = np.max(rewards)
         self.std_reward = np.sqrt(np.var(rewards) / len(rewards))
@@ -391,9 +390,9 @@ class PolicyGradient(object):
             self.eval_reward = scores_eval[-1]
     
     def train(self):
-        """
+        '''
         开始训练
-        """
+        '''
         self.init_averages()
         scores_eval = [] 
         for t in range(self.config.num_batches):
@@ -439,10 +438,9 @@ class PolicyGradient(object):
         self.writer.close()
         
     def record_summary(self, t):
-        """
-        Add summary to tfboard
-        You don't have to change or use anything here.
-        """
+        '''
+        tensorboard 添加记录
+        '''
         self.writer.add_scalar('avg_reward', self.avg_reward, t)
         self.writer.add_scalar('max_reward', self.max_reward, t)
         self.writer.add_scalar('std_reward', self.std_reward, t)
@@ -458,7 +456,6 @@ class PolicyGradient(object):
         if self.config.use_baseline:
             torch.save(self.baseline_net.state_dict(), self.config.baseline_model_output)
     
-
     def load(self):
         '''
         导入模型
@@ -467,17 +464,14 @@ class PolicyGradient(object):
         self.baseline_net.load_state_dict(torch.load(self.config.baseline_model_output))
         self.policy_net.eval()
         self.baseline_net.eval()
-    
         
     def run(self):
         self.train()
     
-
 if __name__ == '__main__':
     config = Config('CartPole-v0', True)
     # config = Config('HalfCheetah-v2', True) 
     env = gym.make(config.env_name)
-
     model = PolicyGradient(env, config)
     if args.train == True:
         # train model
