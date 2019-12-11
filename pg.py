@@ -43,13 +43,13 @@ class Config():
             self.summary_freq = 1
             
             # model and training config
-            self.num_batches            = 100 # 训练多少个batch
+            self.num_batches            = 200 # 训练多少个batch
             self.batch_size             = 1000 # 每个batch，最大步长
             self.max_ep_len             = 1000 # 每条路径的最大长度
             self.learning_rate          = 3e-2 # 学习率
             self.gamma                  = 1.0 # 折扣因子
             self.use_baseline           = use_baseline
-            self.normalize_advantage    = True 
+            self.normalize_advantage    = False 
 
             # parameters for the policy and baseline models
             self.n_hidden_layers               = 2
@@ -83,7 +83,7 @@ class Config():
             self.summary_freq = 1
             
             # model and training config
-            self.num_batches            = 100 # 训练多少个batch
+            self.num_batches            = 1000 # 训练多少个batch
             self.batch_size             = 50000 # 每个batch，最大步长
             self.max_ep_len             = 1000 # 每条路径的最大长度
             self.learning_rate          = 3e-2 # 学习率
@@ -461,15 +461,18 @@ class PolicyGradient(object):
         导入模型
         '''
         self.policy_net.load_state_dict(torch.load(self.config.policy_model_output))
-        self.baseline_net.load_state_dict(torch.load(self.config.baseline_model_output))
         self.policy_net.eval()
-        self.baseline_net.eval()
+        if self.config.use_baseline:
+            self.baseline_net.load_state_dict(torch.load(self.config.baseline_model_output))
+            self.baseline_net.eval()
         
     def run(self):
         self.train()
     
 if __name__ == '__main__':
-    config = Config('CartPole-v0', True)
+    # 这里不加baseline, 也不归一化回报，就是纯粹的策略梯度方法
+    # 减去baseline效果会更好
+    config = Config('CartPole-v0', False) 
     # config = Config('HalfCheetah-v2', True) 
     env = gym.make(config.env_name)
     model = PolicyGradient(env, config)
