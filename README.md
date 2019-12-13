@@ -5,7 +5,19 @@
 - 安装gym, mujoco [详见:gym](https://github.com/openai/gym)
 - 安装pytorch, [详见:pytorch](https://pytorch.org/)
 
-## Policy Gradient 
+## 给予值函数的动态规划算法
+在模型已知且动作空间离散、状态空间离散的情况下，动态规划算法可以解决强化学习问题。其中算法包括策略迭代算法与值迭代算法。vi_and_pi.py中实现了这两个算法。
+- 运行策略迭代算法
+    ```shell
+    $ cd RL-toys
+    $ python vi_and_pi.py --policy
+    ```
+- 运行值迭代算法
+    ```shell
+    $ cd RL-toys
+    $ python vi_and_pi.py --value
+    ```
+## 策略梯度算法
 - 训练策略网络
     ```shell
     $ cd RL-toys
@@ -23,4 +35,3 @@
     ```shell
     $ python pg.py --test
     ```
-
