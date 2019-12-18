@@ -23,9 +23,9 @@
     $ cd RL-toys
     $ python pg.py --train
     ```
-- 训练完成后查看训练过程中每个batch回报值变化
+- 查看训练过程中每个batch回报值变化
     ```shell
-    $ tensorboard --logdir=pg_save
+    $ tensorboard --logdir=save/pg/
     ```
     可在网页中看到每个batch的平均回报、最大回报等数据：  
 
@@ -35,3 +35,23 @@
     ```shell
     $ python pg.py --test
     ```
+
+## PPO
+-  在Ant-v2环境中训练PPO
+    ```shell
+    $ cd RL-toys
+    $ python ppo.py --train --env Ant-v2
+    ```
+     
+- 查看训练过程中每个batch回报值变化
+    ```shell
+    $ tensorboard --logdir=save/ppo/Ant-v2/
+    ```
+
+    ![](resource_md/img/Ant-v2-2.png) 
+-  测试训练好的模型
+    ```shell
+    $ cd RL-toys
+    $ python ppo.py --test --env Ant-v2
+    ```
+

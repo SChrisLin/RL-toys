@@ -30,7 +30,7 @@ class Config():
             baseline_str = 'baseline' if use_baseline else 'no_baseline'
 
             # output config
-            self.output_path = "./pg_save/{}-{}/".format(self.env_name, baseline_str)
+            self.output_path = "./save/pg/{}-{}/".format(self.env_name, baseline_str)
             self.model_output = self.output_path + "model.weights/"
             self.policy_model_output = self.model_output + "policy_model"
             self.baseline_model_output = self.model_output + "/baseline_model"
@@ -70,7 +70,7 @@ class Config():
             baseline_str = 'baseline' if use_baseline else 'no_baseline'
 
             # output config
-            self.output_path = "./pg_save/{}-{}/".format(self.env_name, baseline_str)
+            self.output_path = "./save/pg/{}-{}/".format(self.env_name, baseline_str)
             self.model_output = self.output_path + "model.weights/"
             self.policy_model_output = self.model_output + "policy_model"
             self.baseline_model_output = self.model_output + "/baseline_model"
