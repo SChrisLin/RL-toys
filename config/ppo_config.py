@@ -12,7 +12,7 @@ class Config():
             self.num_batches = 500 # batch数量
             self.batch_size = 2000 # 每个batch多长
             self.max_ep_len = 2000 # 每条episode最大多长
-            self.gamma = 0.95  # 折扣因子
+            self.gamma = 0.99  # 折扣因子
             self.actor_lr = 0.001
             self.critic_lr = 0.003 
             self.actor_train_steps = 1
@@ -25,7 +25,7 @@ class Config():
             self.output_path = './save/ppo/{}/'.format(self.env_name)
             self.log_path = self.output_path + "log.txt"
             self.randomseed = 1  # random seed
-            self.num_batches = 1000 # batch数量
+            self.num_batches = 400 # batch数量
             self.batch_size = 500 # 每个batch多长
             self.max_ep_len = 500 # 每条episode最大多长
             self.gamma = 0.95  # 折扣因子
@@ -35,6 +35,7 @@ class Config():
             self.critic_train_steps = 10
             self.num_units = 64
             self.num_episodes = None
+
 
 
             

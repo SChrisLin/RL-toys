@@ -37,6 +37,7 @@
     ```
 
 ## PPO
+PPO比较稳，但不一定效果最好。
 -  在Ant-v2环境中训练PPO
     ```shell
     $ cd RL-toys

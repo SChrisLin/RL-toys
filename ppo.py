@@ -46,7 +46,7 @@ class Actor(nn.Module):
     def forward(self, x):
         l1 = F.relu(self.fc1(x))
         a = torch.tanh(self.fc2(l1))
-        mu =  a 
+        mu =  2 * a 
         sigma = F.softplus(self.fc3(l1))
         return [mu, sigma]
 
