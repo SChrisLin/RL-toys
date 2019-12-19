@@ -227,10 +227,14 @@ class PPO(object):
             sigma_reward = np.sqrt(np.var(total_rewards) / len(total_rewards))
             msg = "{:d}/{:d}:Average reward: {:04.2f} +/- {:04.2f}".format(t+1, self.config.num_batches, avg_reward, sigma_reward)
 
+            # learning rate decay
+            if self.config.lr_decay == True:
+                self.config.critic_lr -= self.config.critic_lr_decay_rate
+                self.config.actor_lr -= self.config.actor_lr_decay_rate
             # 添加tensorbord 记录
-            if (t):
+            if ((t+1) % self.config.record_frequency == 0):
                 self.update_averages(total_rewards, scores_eval)
-                self.record_summary(t)
+                self.record_summary((t+1)*self.config.batch_size)
 
             # print(msg)
             # 保存最佳模型
@@ -282,7 +286,6 @@ class PPO(object):
                 action = self.sample_action(state)
                 # state是array,reward是一个数
                 state, reward, done, _ = env.step(action)
-                
                 # env.render()
                 actions.append(action)
                 rewards.append(reward)
@@ -314,6 +317,7 @@ class PPO(object):
         all_returns = []
         for path in paths:
             # calculate Gt of a path
+            # 使用critic评估
             s_ = path['observation'][-1]
             buffer_r = path['reward']
             v_s_ = self.get_v(s_) # 得到最后状态的V(s)
@@ -325,6 +329,15 @@ class PPO(object):
             buffer_r = []
             # store Gt   
             all_returns.append(discounted_r)
+
+            # # 一条轨迹的最后一步，不使用critic评估
+            # # 一条路径中一组汇报rt
+            # rewards = path["reward"]
+            # max_step = len(rewards)
+            # # 计算Gt,也是一组
+            # path_returns = [np.sum(np.power(self.config.gamma, np.arange(max_step - t)) * rewards[t:]) for t in range(max_step)]
+            # all_returns.append(path_returns)
+
         # 拼接回报, 横着拼接，变成很长的list
         states = np.concatenate([path['observation'] for path in paths])
         actions = np.concatenate([path['action'] for path in paths])
@@ -368,7 +381,7 @@ class PPO(object):
 
 if __name__ == '__main__':
     env_name = args.env
-    assert env_name in ['InvertedPendulum-v2', 'Ant-v2'], '没有输入正确的环境名称'
+    assert env_name in ['InvertedPendulum-v2', 'Ant-v2', 'Pendulum-v0'], '没有输入正确的环境名称'
          
     # env = gym.make('InvertedPendulum-v2')
     # env = gym.make('Pendulum-v0')
@@ -378,7 +391,6 @@ if __name__ == '__main__':
     cfg = ppo_config.Config(env_name)
     env = gym.make(cfg.env_name)
 
-    
     S_DIM, A_DIM = env.observation_space.shape[0], env.action_space.shape[0]   # state dimension, action dimension
    
     # 设置随机数种子，保证可复现
