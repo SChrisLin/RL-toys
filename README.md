@@ -1,5 +1,5 @@
 # Reinforcement Learning Toys
-一些常见强化学习算法简单代码实现。  
+一些常见强化学习算法简单代码实现。工程应用请使用 [OpenAi baselines](https://github.com/openai/baselines)  
 ## 运行要求
 - Python 3.X
 - 安装gym, mujoco [详见:gym](https://github.com/openai/gym)
